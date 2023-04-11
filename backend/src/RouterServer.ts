@@ -3,8 +3,11 @@ import * as bodyParser from 'body-parser'
 import { Server } from '@overnightjs/core'
 import { Logger } from '@overnightjs/logger'
 import { Request, Response } from 'express';
+import cookieParser from 'cookie-parser'
 import mongoose, { ConnectOptions } from 'mongoose';
 import cors from 'cors'
+import {ErrorMiddleware} from './middleware/ErrorMiddleware'
+import { body } from 'express-validator'
 
 class RouterServer extends Server {
 
@@ -18,12 +21,15 @@ class RouterServer extends Server {
       .connect(this.DB_NAME, { useNewUrlParser: true, useUnifiedTopology: true } as ConnectOptions)
       .then(res => Logger.Imp('Connected to db'))
       .then(error => Logger.Err(error))
+    this.app.use(cookieParser())
     this.app.use(bodyParser.json())
     this.app.use(bodyParser.urlencoded({extended: true}))
     this.app.use(cors({
-      origin: '*'
+      credentials: true,
+      origin: 'http://localhost:3000'
     }))
     this.SetupControllers()
+    this.app.use(ErrorMiddleware)
   }
 
   private SetupControllers(): void {

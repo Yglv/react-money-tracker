@@ -1,17 +1,30 @@
-import React from 'react';
+import React, { ReactElement, useContext, useEffect } from 'react';
 import './App.css';
-import { BrowserRouter, Routes, Route } from "react-router-dom"
-import { Menu } from './components/Menu'
-import { Home } from './components/Home'
+import Menu from './components/Menu'
+import Home from './components/Home'
+import { Context } from '.';
+import { observer } from 'mobx-react-lite'
+import { LoadingPanel } from './components/LoadingPanel';
 
-function App() {
+function App(): ReactElement {
+  const {store} = useContext(Context)
+
+  useEffect(() => {
+    if (localStorage.getItem('token')) {
+      store.checkAuth()
+    }
+  }, [])
+
+  if (store.isLoading) {
+    return <LoadingPanel/>
+  }
+
+  if (!store.isAuth ) {
+    return (<Home/>)
+  }
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Menu/>}></Route>
-      </Routes>
-    </BrowserRouter>
-  );
+    <Menu/>
+  )
 }
 
-export default App;
+export default observer(App);
